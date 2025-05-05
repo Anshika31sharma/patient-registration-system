@@ -2,6 +2,20 @@ import { PGlite } from '@electric-sql/pglite';
 
 let db: PGlite | null = null;
 
+export interface Patient {
+  name: string;
+  age: number;
+  gender: string;
+  email: string;
+  phone: string;
+  emergencyContact: string;
+  address: string;
+  bloodGroup: string;
+  symptoms: string;
+  admissionDate: string;
+  insuranceId: string;
+}
+
 export async function initializeDB() {
   try {
     db = new PGlite('patient-data.db');
@@ -27,12 +41,12 @@ export async function initializeDB() {
   }
 }
 
-export const savePatientData = async (data: { [key: string]: any }) => {
-  const existing = JSON.parse(localStorage.getItem("patients") || "[]");
+export const savePatientData = async (data: Patient) => {
+  const existing: Patient[] = JSON.parse(localStorage.getItem("patients") || "[]");
   existing.push(data);
   localStorage.setItem("patients", JSON.stringify(existing));
 };
 
-export const getPatientData = async () => {
+export const getPatientData = async (): Promise<Patient[]> => {
   return JSON.parse(localStorage.getItem("patients") || "[]");
 };

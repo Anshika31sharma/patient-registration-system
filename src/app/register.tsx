@@ -19,9 +19,15 @@ interface FormData {
 
 interface Patient {
   name: string;
-  age: string;
+  age: number;
   gender: string;
   email: string;
+  phone: string;
+  emergencyContact: string;
+  address: string;
+  bloodGroup: string;
+  symptoms: string;
+  admissionDate: string;
 }
 
 const Register = () => {
@@ -41,6 +47,7 @@ const Register = () => {
 
   const [patients, setPatients] = useState<Patient[]>([]);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -72,7 +79,7 @@ const Register = () => {
     e.preventDefault();
     if (!validate()) return;
 
-    await savePatientData(formData);
+    await savePatientData({ ...formData, age: Number(formData.age) });
     toast.success("Patient Registered!");
 
     const updated = await getPatientData();
@@ -90,6 +97,14 @@ const Register = () => {
       admissionDate: "",
       insuranceId: ""
     });
+  };
+
+  const handlePatientClick = (patient: Patient) => {
+    setSelectedPatient(patient);
+  };
+
+  const closePopup = () => {
+    setSelectedPatient(null);
   };
 
   return (
@@ -186,7 +201,11 @@ const Register = () => {
         ) : (
           <ul className="space-y-2">
             {patients.map((p, idx) => (
-              <li key={idx} className="p-3 border rounded bg-white shadow-sm">
+              <li
+                key={idx}
+                className="p-3 border rounded bg-white shadow-sm cursor-pointer hover:bg-gray-100 transition-all"
+                onClick={() => handlePatientClick(p)}
+              >
                 <strong>{p.name}</strong> — {p.age} yrs, {p.gender}
                 <div className="text-sm text-gray-600">{p.email}</div>
               </li>
@@ -194,6 +213,36 @@ const Register = () => {
           </ul>
         )}
       </div>
+
+      {selectedPatient && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={closePopup}
+        >
+          <div
+            className="bg-white p-6 rounded-lg shadow-lg w-96 relative animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="absolute top-2 cursor-pointer right-2 text-gray-500 hover:text-gray-700"
+              onClick={closePopup}
+            >
+              &times;
+            </button>
+            <h3 className="text-xl font-bold mb-4">Patient Details</h3>
+            <p><strong>Name:</strong> {selectedPatient.name}</p>
+            <p><strong>Age:</strong> {selectedPatient.age}</p>
+            <p><strong>Gender:</strong> {selectedPatient.gender}</p>
+            <p><strong>Email:</strong> {selectedPatient.email}</p>
+            <p><strong>Phone:</strong> {selectedPatient.phone}</p>
+            <p><strong>Emergency Contact:</strong> {selectedPatient.emergencyContact}</p>
+            <p><strong>Address:</strong> {selectedPatient.address}</p>
+            <p><strong>Blood Group:</strong> {selectedPatient.bloodGroup}</p>
+            <p><strong>Symptoms:</strong> {selectedPatient.symptoms}</p>
+            <p><strong>Admission Date:</strong> {selectedPatient.admissionDate}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
